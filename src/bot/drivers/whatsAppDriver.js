@@ -6,6 +6,7 @@ const LogicForAddingUserToRoom = require("../../utils/logicForAddingUserToRoom")
 
 class WhatsAppDriver {
   constructor() {
+    this.message = "";
     this.client = new Client();
     this.dailyController = new dailyController();
     this.controllerUser = new userController();
@@ -27,6 +28,7 @@ class WhatsAppDriver {
     });
 
     this.client.on("message", async (message) => {
+      this.message = message;
       await this.handleUser(message);
     });
 
@@ -54,7 +56,7 @@ class WhatsAppDriver {
     this.startConversation = true;
     const contactName = contact.pushname || "Desconhecido";
     await this.controllerUser.createStartupUser(contactName, contact.id.user);
-    return message.reply(this.dailyController.handleDailyMessage());
+    return this.message.reply(this.dailyController.handleDailyMessage());
   }
 
   async handleRoomConfirmation(message) {
