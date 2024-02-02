@@ -1,13 +1,11 @@
-const Daily = require("../entities/daily.js");
+require("dotenv").config();
 
 class DailyUseCase {
-  constructor() {}
-
   getDailyMessage() {
     return `Olá! 😊 Reserve agora o seu horário no Diário Sucox! 
 Envie "Quero reservar o horário das [insira os horários desejados, por exemplo, 1 para 19:00, 2 para 20:00]." 
 Substitua pelos números correspondentes aos horários que preferir. Pode ser a qualquer hora!
-
+    
 ⏱️ Horários Disponíveis ⏱️
 1️⃣ 19:00 - 12 vagas
 2️⃣ 20:00 - 12 vagas
@@ -16,30 +14,29 @@ Substitua pelos números correspondentes aos horários que preferir. Pode ser a 
 5️⃣ 23:00 - 12 vagas
 6️⃣ 00:00 - 12 vagas
 7️⃣ 01:00 - 12 vagas
-    
-Envie o número correspondente para garantir seu lugar! 🕹️✨
-    `;
+        
+Envie o número correspondente para garantir seu lugar! 🕹️✨`;
   }
 
-  getConfirmationRoom(resultLogicForAddingUserToRoom) {
+  getConfirmationRoom(twoHours, resultMessage, getTotalCost) {
     return `Voce escolheu ${
-      resultLogicForAddingUserToRoom.chosenRooms.twoHours
-        ? "a sala das "
-        : "as salas da "
-    }${
-      resultLogicForAddingUserToRoom.chosenRooms.resultMessage
-    }o valor vai ser de R$${
-      resultLogicForAddingUserToRoom.getTotalCost
-    }, deseja prosseguir?
-(por favor digite sim ou nao)
-    `;
+      twoHours ? "a sala das " : "as salas da "
+    }${resultMessage}o valor vai ser de R$${getTotalCost}, deseja prosseguir?
+(por favor digite "sim" ou "nao", caso os horário(s) esteja errado digite "resetar")`;
   }
 
   errorMessageWhenChoosingRoom() {
     return `Por favor preste atenção na tabela abaixo.
-    
-${this.getDailyMessage()}
-    `;
+${this.getDailyMessage()}`;
+  }
+
+  pixKeyAfterConfirmation() {
+    return `Faca o pagamento via pix para esse numero: ${process.env.PIX_KEY}, apos o pagamento mande o comprovante para confirmação da sala`;
+  }
+
+  secondConfirmationMessage(twoHours, resultMessage, getTotalCost) {
+    return `${this.getConfirmationRoom(twoHours, resultMessage, getTotalCost)}  
+`;
   }
 }
 

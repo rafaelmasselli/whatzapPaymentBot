@@ -2,6 +2,7 @@ const db = require("../db/db");
 
 class User {
   constructor(
+    id = null,
     name,
     phoneNumber,
     squadName = null,
@@ -9,6 +10,7 @@ class User {
     paymentInfo = null,
     isPaid = false
   ) {
+    this.id = id;
     this.name = name;
     this.phoneNumber = phoneNumber;
     this.squadName = squadName;
@@ -20,7 +22,8 @@ class User {
   async createStartupUser() {
     const query =
       "INSERT INTO users (name, phoneNumber, isPaid) VALUES (?, ?, ?)";
-    const params = [this.name, this.phoneNumber, (this.isPaid = 0)];
+    this.isPaid = 0;
+    const params = [this.name, this.phoneNumber, this.isPaid];
 
     try {
       const result = await db.run(query, params);
@@ -36,6 +39,16 @@ class User {
     try {
       const user = await db.all(query, [this.phoneNumber]);
       return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteUserByCellPhoneNumber() {
+    const query = "DELETE FROM users WHERE id = ?";
+    try {
+      const result = await db.run(query, [this.id]);
+      return result.changes > 0;
     } catch (error) {
       throw error;
     }
