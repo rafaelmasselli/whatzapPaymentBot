@@ -9,14 +9,27 @@ class dailyController {
     return this.dailyUseCase.getDailyMessage();
   }
 
-  handleRoomConfirmationMessage(resultLogicForAddingUserToRoom) {
+  handleRoomConfirmationMessage(twoHours, resultMessage, getTotalCost) {
     return this.dailyUseCase.getConfirmationRoom(
-      resultLogicForAddingUserToRoom
+      twoHours,
+      resultMessage,
+      getTotalCost
     );
   }
 
   handleErrorWhenSendingRoomTimeMessage() {
     return this.dailyUseCase.errorMessageWhenChoosingRoom();
+  }
+  handlePixKeyAfterConfirmation() {
+    return this.dailyUseCase.pixKeyAfterConfirmation();
+  }
+
+  handleSecondConfirmationMessage(twoHours, resultMessage, getTotalCost) {
+    return this.dailyUseCase.secondConfirmationMessage(
+      twoHours,
+      resultMessage,
+      getTotalCost
+    );
   }
 }
 

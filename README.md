@@ -1,4 +1,4 @@
-## WhatsApp Bot Project (BotW)
+## WhatsApp Bot Project
 
 ### Description
 
