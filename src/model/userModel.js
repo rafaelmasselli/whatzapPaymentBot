@@ -27,8 +27,7 @@ class User {
 
     try {
       const result = await db.run(query, params);
-      console.log(`User ${this.name} added with ID: ${result.id}`);
-      return result.id;
+      return result;
     } catch (error) {
       throw error;
     }

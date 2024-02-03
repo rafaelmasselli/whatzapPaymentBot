@@ -1,6 +1,6 @@
 const db = require("../db/db");
 
-class User {
+class rooms {
   constructor(
     id,
     user_id = null,
@@ -33,12 +33,24 @@ class User {
 
     try {
       const result = await db.run(query, params);
-      console.log(`User added to room with ID: ${result.id}`);
       return result.id;
     } catch (error) {
       throw error;
     }
   }
+  async numberOfRoomsAvailable() {
+    const query = `
+        SELECT id, available_vacancies, championshipTime
+        FROM schedules
+    `;
+
+    try {
+      const result = await db.all(query);
+      return result;
+    } catch (error) {
+      console.error("error when searching for salts ", error);
+    }
+  }
 }
 
-module.exports = User;
+module.exports = rooms;

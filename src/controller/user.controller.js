@@ -1,27 +1,26 @@
-const user = require("../model/userModel");
+const User = require("../model/userModel");
 
 class userController {
   constructor() {
-    this.User = new user();
+    this.user = new User();
   }
 
   async getUserPhoneNumber(phoneNumber) {
-    this.User.phoneNumber = phoneNumber;
-    const UserFindByPhoneNumber = await this.User.getFindByPhoneNumber();
+    this.user.phoneNumber = phoneNumber;
+    const UserFindByPhoneNumber = await this.user.getFindByPhoneNumber();
     return UserFindByPhoneNumber;
   }
 
   async createStartupUser(name, phoneNumber) {
-    this.User.name = name;
-    this.User.phoneNumber = phoneNumber;
-    const userId = await this.User.createStartupUser();
-    return { message: `Usuário criado com sucesso! ID: ${userId}` };
+    this.user.name = name;
+    this.user.phoneNumber = phoneNumber;
+    const user = await this.user.createStartupUser();
+    return { message: `Usuário criado com sucesso! ${user}` };
   }
   async deleteUser(id) {
-    this.User.id = id;
-    console.log(id);
+    this.user.id = id;
     try {
-      const result = await this.User.deleteUserByCellPhoneNumber();
+      const result = await this.user.deleteUserByCellPhoneNumber();
       if (result) {
         return { message: `Usuário excluído com sucesso!` };
       } else {

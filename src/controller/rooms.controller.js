@@ -1,5 +1,12 @@
-
+const Rooms = require("../model/roomModel");
 
 class roomController {
-     async addUserRoom(){}
+  constructor() {
+    this.rooms = new Rooms();
+  }
+  async searchForANumberOfAvailableRooms() {
+    return await this.rooms.numberOfRoomsAvailable();
+  }
 }
+
+module.exports = roomController;

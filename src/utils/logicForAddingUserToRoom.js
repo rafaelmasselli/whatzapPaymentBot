@@ -40,7 +40,16 @@ class LogicForAddingUserToRoom {
   }
 
   #getTotalCost() {
-    const totalCost = this.userChoices.length * 1.5;
+    const uniqueChoices = new Set(this.userChoices);
+
+    let validRooms = 0;
+    for (const choice of uniqueChoices) {
+      if (choice >= 1 && choice <= 7) {
+        validRooms += 1;
+      }
+    }
+
+    const totalCost = validRooms * 1.5;
     return totalCost.toFixed(2);
   }
 
