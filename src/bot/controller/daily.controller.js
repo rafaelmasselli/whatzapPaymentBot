@@ -31,6 +31,10 @@ class dailyController {
       getTotalCost
     );
   }
+
+  handleMessageReset() {
+    return this.dailyUseCase.messageReset();
+  }
 }
 
 module.exports = dailyController;

@@ -3,9 +3,9 @@ const fs = require("fs");
 const Tesseract = require("tesseract.js");
 const { Client } = require("whatsapp-web.js");
 const dailyController = require("../controller/daily.controller");
-const userController = require("../../controller/user.controller");
+const { userController, roomsController } = require("../../controller/");
 const {
-  LogicForAddingUserToRoom,
+  logicForAddingUserToRoom,
   findUserByPhoneNumber,
 } = require("../../utils/");
 
@@ -20,6 +20,7 @@ class WhatsAppDriver {
     this.client = new Client();
     this.dailyController = new dailyController();
     this.controllerUser = new userController();
+    this.RoomsController = new roomsController();
     this.startConversation = false;
     this.confirmationPayment = false;
     this.receivedTheRoom = false;
@@ -27,7 +28,6 @@ class WhatsAppDriver {
     this.errorMessage = false;
     this.secondConfirmationMessage = false;
     this.rooms = [];
-
     this.setup();
   }
 
@@ -42,6 +42,9 @@ class WhatsAppDriver {
 
     this.client.on("message", async (message) => {
       this.message = message;
+      const rooms =
+        await this.RoomsController.searchForANumberOfAvailableRooms();
+      this.dailyController.dailyUseCase.rooms = rooms;
       await this.handleUser(message);
     });
 
@@ -57,7 +60,7 @@ class WhatsAppDriver {
       await this.#handleNewUser(contact);
     } else {
       if (this.id == "" || this.id == null) {
-        this.id = findUserByPhoneNumber(contact.id.user);
+        this.id = findUserByPhoneNumber(users, contact.id.user);
       }
       if (this.photoOfProofOfPayment) await this.#handleProofOfPayment();
       else if (this.errorMessage) await this.#handleRoomSelection();
@@ -65,6 +68,28 @@ class WhatsAppDriver {
       else if (this.receivedTheRoom) await this.#handleRoomConfirmation();
       else await this.#handleInvalidInput();
     }
+  }
+
+  async #handleDeleteUserById(id, message) {
+    await this.message.reply(message);
+    await this.controllerUser.deleteUser(id).then(async () => {
+      this.#handleDisableFunctions();
+      this.id = "";
+      this.number = "";
+      this.message = "";
+      this.twoHours = "";
+      this.resultMessage = "";
+      this.getTotalCost = "";
+      this.rooms = [];
+      this.photoOfProofOfPayment = false;
+    });
+  }
+
+  #handleDisableFunctions() {
+    this.errorMessage = false;
+    this.startConversation = false;
+    this.secondConfirmationMessage = false;
+    this.receivedTheRoom = false;
   }
 
   async #handleNewUser(contact) {
@@ -79,34 +104,22 @@ class WhatsAppDriver {
   }
 
   async #handleRoomConfirmation() {
-    const disableFunctions = async () => {
-      this.errorMessage = false;
-      this.startConversation = false;
-      this.secondConfirmationMessage = false;
-      this.receivedTheRoom = false;
-    };
-
     const lowerCaseMessage = await this.message.body.toLowerCase();
     if (lowerCaseMessage === "sim") {
       await this.message.reply(
         this.dailyController.handlePixKeyAfterConfirmation()
       );
-      await disableFunctions();
+      this.#handleDisableFunctions();
       this.photoOfProofOfPayment = true;
-    } else if (lowerCaseMessage === "não" || lowerCaseMessage === "nao") {
-      await this.message.reply("Negado");
-      await disableFunctions();
-    } else if (lowerCaseMessage == "resetar") {
-      await this.controllerUser
-        .deleteUser(this.id)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-      this.photoOfProofOfPayment = false;
-      await disableFunctions();
+    } else if (
+      lowerCaseMessage == "resetar" ||
+      lowerCaseMessage === "não" ||
+      lowerCaseMessage === "nao"
+    ) {
+      await this.#handleDeleteUserById(
+        this.id,
+        this.dailyController.handleMessageReset()
+      );
     } else {
       if (this.secondConfirmationMessage)
         await this.message.reply(
@@ -122,7 +135,7 @@ class WhatsAppDriver {
   async #handleRoomSelection() {
     const messageNumberRoom = this.message.body;
     const numbers = messageNumberRoom.match(/\d+/g);
-    const resultLogicForAddingUserToRoom = new LogicForAddingUserToRoom(
+    const resultLogicForAddingUserToRoom = new logicForAddingUserToRoom(
       numbers
     ).inicialize();
 
@@ -159,7 +172,6 @@ class WhatsAppDriver {
     try {
       if (this.message.hasMedia) {
         const media = await this.message.downloadMedia();
-        console.log(media.data);
         const fileName = `payment_${Date.now()}.jpeg`;
         const filePath = `./downloads/${fileName}`;
         fs.writeFileSync(filePath, media.data);
